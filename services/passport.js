@@ -23,19 +23,30 @@ passport.use(new GoogleStrategy({
     callbackURL: '/auth/google/callback',
     proxy: true
   },
-  (accessToken, refreshToken, profile, done) => {
+  //refactor
+  // (accessToken, refreshToken, profile, done) => {
+  //   User.findOne({ userID: profile.id }).then((existingUser) => {
+  //       if (existingUser) {
+  //         // we already have a record with the give profile ID
+  //         done(null, existingUser);
+  //       } else {
+  //         // need to create new reacord
+  //         new User({ userID: profile.id })
+  //           .save()
+  //           .then(user => done(null, user));
+  //       }
+  //     })
+  //   }
+  // )
+  //refactor end
+  async (accessToken, refreshToken, profile, done) => {
+    const existingUser = await User.findOne({ googleId: profile.id })
+    if (existingUser) {
+      return done(null, existingUser);
+    }
+    const user = await new User({ googleId: profile.id }).save()
+    done(null,user);
 
-    User.findOne({ userID: profile.id }).then((existingUser) => {
-        if (existingUser) {
-          // we already have a record with the give profile ID
-          done(null, existingUser);
-        } else {
-          // need to create new reacord
-          new User({ userID: profile.id })
-            .save()
-            .then(user => done(null, user));
-        }
-      })
     }
   )
 );
